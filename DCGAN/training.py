@@ -18,7 +18,7 @@ n_epochs = 10
 features_g = 64
 features_d = 64
 img_size = 64
-channels_img = 1
+channels_img = 3
 
 
 transforms = transforms.Compose([
@@ -31,7 +31,7 @@ transforms = transforms.Compose([
 ])
 
 # dataset
-dataset = datasets.MNIST(root='data/', transform=transforms)
+dataset = datasets.ImageFolder(root='data/celeb_dataset', transform=transforms)
 loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 # Initialize models
@@ -51,8 +51,8 @@ criterion = nn.BCELoss()
 fixed_noise = torch.randn(batch_size, z_dim, 1, 1, device=device)
 
 # tensorboard
-writer_real = SummaryWriter(f'runs/DCGAN_MNIST/real_images')
-writer_fake = SummaryWriter(f'runs/DCGAN_MNIST/fake_images')
+writer_real = SummaryWriter(f'runs/DCGAN_CELEBA/real_images')
+writer_fake = SummaryWriter(f'runs/DCGAN_CELEBA/fake_images')
 
 step = 0
 
@@ -86,7 +86,10 @@ for epoch in range(n_epochs):
 
         # tensorboard
         if batch_idx % 100 == 0:
-            print(f'Epoch: {epoch}/{n_epochs} | Discriminator Loss: {disc_loss} | Generator Loss: {gen_loss}')
+            print(
+                f"Epoch [{epoch}/{n_epochs}] Batch {batch_idx}/{len(loader)} \
+                  Loss D: {disc_loss:.4f}, loss G: {gen_loss:.4f}"
+            )
 
             with torch.no_grad():
                 fake = gen(fixed_noise)
@@ -94,11 +97,11 @@ for epoch in range(n_epochs):
                 img_grid_real = torchvision.utils.make_grid(real[:32], normalize=True)
 
                 writer_fake.add_image(
-                    "Mnist DCGAN Fake images", img_grid_fake, global_step=step
+                    "CelebA DCGAN Fake images", img_grid_fake, global_step=step
                 )
 
                 writer_real.add_image(
-                    "Mnist DCGAN Real images", img_grid_real, global_step=step
+                    "CelebA DCGAN Real images", img_grid_real, global_step=step
                 )
 
                 step +=1
